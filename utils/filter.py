@@ -1,4 +1,6 @@
 
+from scipy.signal import butter, filtfilt
+import pandas as pd
 
 def butterworth_lowpass_filter(data, cutoff, fs, order=2):
     """Apply a zero-lag Butterworth low-pass filter to the data.
@@ -23,4 +25,14 @@ def butterworth_lowpass_filter(data, cutoff, fs, order=2):
     
     # Design the Butterworth filter
 
-    pass 
+    if fs == None:
+        raise ValueError("Sampling frequency (fs) must be provided for filtering.")
+    nyquist = 0.5 * fs
+    low = cutoff / nyquist
+    b, a = butter(order, low, btype='low')
+    filtered_data = data.copy()
+    for column in data.columns:
+        if column.lower() not in ['time', 'frame#']:
+            filtered_data[column] = filtfilt(b, a, data[column])
+    return filtered_data   
+ 
